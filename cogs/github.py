@@ -82,7 +82,8 @@ class BugModal(disnake.ui.Modal):
         )
 
     async def uploadImageToGithub(self, image: disnake.Attachment | None) -> str | None:
-        """Upload an image to Github as a commit to the `assets` branch"""
+        """Upload an image to Github as a commit to the `pipebot-issues-assets` branch"""
+        BRANCH = "pipebot-issues-assets"
         if (
             (not image)
             or (not image.content_type)
@@ -96,18 +97,16 @@ class BugModal(disnake.ui.Modal):
         path = f"issues/{name}"
 
         try:
-            self.repo.get_contents(path=path, ref="assets")
+            self.repo.get_contents(path=path, ref=BRANCH)
         except Exception:
             self.repo.create_file(
                 path=path,
                 content=image_bytes,
-                branch="assets",
+                branch=BRANCH,
                 message=f"supporting image ({image.filename})",
             )
 
-        return (
-            f"https://github.com/{os.getenv('GITHUB_REPO')}/blob/assets/{path}?raw=true"
-        )
+        return f"https://github.com/{os.getenv('GITHUB_REPO')}/blob/{BRANCH}/{path}?raw=true"
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:  # type: ignore[name-defined]
         title = inter.text_values["title"]
