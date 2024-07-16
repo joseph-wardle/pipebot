@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from disnake.ext import commands, tasks
 from random import choice
@@ -18,7 +20,7 @@ class AvatarRandomizer(commands.Cog):
     async def update_avatar(self) -> None:
         new_avatar = choice(self.avatar_list)
         print("updating avatar!")
-        
+
         with open(new_avatar, "rb") as img:
             await self.bot.user.edit(avatar=img.read())
 

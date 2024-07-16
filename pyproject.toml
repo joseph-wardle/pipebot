@@ -1,0 +1,27 @@
+[tool.mypy]
+files = ["pipebot.py", "cogs"]
+
+[tool.poetry]
+name = "pipebot"
+version = "0.2.0"
+description = "A Discord bot for helping out in a CGI film pipeline"
+license = "BSD-3"
+authors = [
+    "Scott Milner"
+]
+repository = "https://github.com/scottdmilner/pipebot"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+aiohttp = ">=3.9"
+disnake = ">=2.9"
+python-dotenv = ">=1.0"
+PyGithub = ">=2.3.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.10.1"
+ruff = "^0.5.2"
+
+[tool.ruff]
+exclude = ["profile_pics"]

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import disnake
 import hmac
 import json
@@ -15,7 +17,7 @@ class Webserver(commands.Cog):
     # see https://stackoverflow.com/a/62481294
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.webserver_port = os.getenv("LISTEN_PORT")
+        self.webserver_port = int(os.getenv("LISTEN_PORT", ""))
         self.app = web.Application()
         routes = web.RouteTableDef()
 
@@ -30,7 +32,9 @@ class Webserver(commands.Cog):
             raw = await request.read()
             hashcheck = (
                 "sha1="
-                + hmac.new(os.getenv("SHOTGRID_SECRET").encode(), raw, sha1).hexdigest()
+                + hmac.new(
+                    os.getenv("SHOTGRID_SECRET", "").encode(), raw, sha1
+                ).hexdigest()
             )
             if hashcheck != request.headers["x-sg-signature"]:
                 print("Error: hashes do not match")
@@ -55,7 +59,9 @@ class Webserver(commands.Cog):
         await self.bot.wait_until_ready()
 
         # for some reason `get_channel` doesn't work but `fetch_channel` does
-        testing_channel = await self.bot.fetch_channel(os.getenv("TESTING_CHANNEL_ID"))
+        testing_channel = await self.bot.fetch_channel(
+            int(os.getenv("TESTING_CHANNEL_ID", ""))
+        )
         if not isinstance(testing_channel, disnake.TextChannel):
             raise TypeError("Channel is invalid")
 

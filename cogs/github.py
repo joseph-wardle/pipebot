@@ -1,20 +1,23 @@
+from __future__ import annotations
+
 import disnake
 import os
 from disnake.ext import commands
 from dotenv import load_dotenv
-from github import Auth
-from github import Github
-from github.Commit import Commit
+from enum import Enum
+from github import Auth, Github
 from hashlib import sha1
 from textwrap import dedent
-from typing import Awaitable, Optional, Union
+from typing import TYPE_CHECKING
 
-from pprint import pprint
+if TYPE_CHECKING:
+    from typing import Awaitable, Optional, Type
+
 
 load_dotenv()
 
 
-PipeCategory = commands.option_enum(
+PipeCategory: Type[Enum] = commands.option_enum(  # type: ignore[assignment]
     {
         "Discord": "discord",
         "Farm": "renderfarm",
@@ -28,7 +31,7 @@ PipeCategory = commands.option_enum(
     }
 )
 
-Severity = commands.option_enum(
+Severity: Type[Enum] = commands.option_enum(  # type: ignore[assignment]
     {
         "Bug": "bug",
         "Critical Bug": "critical",
@@ -40,20 +43,20 @@ Severity = commands.option_enum(
 class BugModal(disnake.ui.Modal):
     def __init__(
         self,
-        category: PipeCategory,
-        severity: Severity,
+        category: PipeCategory,  # type: ignore[valid-type]
+        severity: Severity,  # type: ignore[valid-type]
         image1: Optional[disnake.Attachment] = None,
         image2: Optional[disnake.Attachment] = None,
     ) -> None:
-        authtoken = Auth.Token(os.getenv("GITHUB_ACCESS_TOKEN"))
+        authtoken = Auth.Token(os.getenv("GITHUB_ACCESS_TOKEN", ""))
         self.g = Github(auth=authtoken)
-        self.repo = self.g.get_repo(os.getenv("GITHUB_REPO"))
+        self.repo = self.g.get_repo(os.getenv("GITHUB_REPO", ""))
 
         self.category = category
         self.severity = severity
 
-        self.image1Url: Awaitable[str] = self.uploadImageToGithub(image1)
-        self.image2Url: Awaitable[str] = self.uploadImageToGithub(image2)
+        self.image1Url: Awaitable[Optional[str]] = self.uploadImageToGithub(image1)
+        self.image2Url: Awaitable[Optional[str]] = self.uploadImageToGithub(image2)
 
         components = [
             disnake.ui.TextInput(
@@ -78,10 +81,14 @@ class BugModal(disnake.ui.Modal):
             timeout=1200,
         )
 
-    async def uploadImageToGithub(self, image: Union[disnake.Attachment, None]) -> str:
+    async def uploadImageToGithub(self, image: disnake.Attachment | None) -> str | None:
         """Upload an image to Github as a commit to the `assets` branch"""
-        if not image or "image" not in image.content_type:
-            return ""
+        if (
+            (not image)
+            or (not image.content_type)
+            or ("image" not in image.content_type)
+        ):
+            return None
 
         image_bytes = await image.read()
         ext = image.filename.split(".")[-1]
@@ -90,7 +97,7 @@ class BugModal(disnake.ui.Modal):
 
         try:
             self.repo.get_contents(path=path, ref="assets")
-        except:
+        except Exception:
             self.repo.create_file(
                 path=path,
                 content=image_bytes,
@@ -102,7 +109,7 @@ class BugModal(disnake.ui.Modal):
             f"https://github.com/{os.getenv('GITHUB_REPO')}/blob/assets/{path}?raw=true"
         )
 
-    async def callback(self, inter: disnake.ModalInteraction) -> None:
+    async def callback(self, inter: disnake.ModalInteraction) -> None:  # type: ignore[name-defined]
         title = inter.text_values["title"]
         description = inter.text_values["description"]
 
@@ -136,17 +143,17 @@ class GithubCmds(commands.Cog):
         self.bot = bot
 
     @commands.slash_command()
-    async def report(self, inter: disnake.ApplicationCommandInteraction):
+    async def report(self, inter: disnake.ApplicationCommandInteraction):  # type: ignore[name-defined]
         pass
 
     @report.sub_command()
     async def bug(
         self,
-        inter: disnake.ApplicationCommandInteraction,
-        category: PipeCategory,
-        severity: Severity,
-        image1: disnake.Attachment = None,
-        image2: disnake.Attachment = None,
+        inter: disnake.ApplicationCommandInteraction,  # type: ignore[name-defined]
+        category: PipeCategory,  # type: ignore[valid-type]
+        severity: Severity,  # type: ignore[valid-type]
+        image1: disnake.Attachment = None,  # type: ignore[assignment]
+        image2: disnake.Attachment = None,  # type: ignore[assignment]
     ) -> None:
         """
         Report a bug to the pipeline team. Please be detailed!
@@ -165,4 +172,4 @@ class GithubCmds(commands.Cog):
 
 
 def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Github(bot))
+    bot.add_cog(GithubCmds(bot))
