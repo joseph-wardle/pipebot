@@ -5,6 +5,7 @@ import hmac
 import json
 import os
 from aiohttp import web
+from datetime import datetime
 from disnake.ext import commands, tasks
 from hashlib import sha1
 from dotenv import load_dotenv
@@ -60,7 +61,13 @@ class Webserver(commands.Cog):
 
             data = await request.json()
             pprint(data)
-            # await self.leads_channel.send("hi")
+            embed = disnake.Embed(
+                title="Model Publish Override",
+                description=f"Notice! The model **{data['asset']}** was exported without passing the model checker to path `{data['path']}` by user **{data['user']}**",
+                color=disnake.Color.yellow(),
+                timestamp=datetime.now(),
+            )
+            await self.leads_channel.send(embed=embed)
             return web.Response(status=200)
 
         self.app.add_routes(routes)
@@ -71,6 +78,7 @@ class Webserver(commands.Cog):
         await runner.setup()
         site = web.TCPSite(runner, host="0.0.0.0", port=self.webserver_port)
         await site.start()
+        print(f"Webserver running on port {self.webserver_port}")
 
     @web_server.before_loop
     async def web_server_before_loop(self) -> None:
@@ -88,7 +96,7 @@ class Webserver(commands.Cog):
         leads_channel = await self.bot.fetch_channel(
             int(os.getenv("LEADS_CHANNEL_ID", ""))
         )
-        if not isinstance(testing_channel, disnake.TextChannel):
+        if not isinstance(leads_channel, disnake.TextChannel):
             raise TypeError("Leads channel is invaleid")
 
         self.leads_channel = leads_channel
