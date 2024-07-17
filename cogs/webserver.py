@@ -62,10 +62,10 @@ class Webserver(commands.Cog):
             data = await request.json()
             pprint(data)
             embed = disnake.Embed(
-                title="Model Publish Override",
-                description=f"Notice! The model **{data['asset']}** was "
-                f"exported without passing the model checker by user "
-                f"**{data['user']}**. File saved to path: `{data['path']}`.",
+                title=":warning: Model Publish Override :warning:",
+                description=f"The model **{data['asset']}** was exported without "
+                f"passing the model checker by user **{data['user']}**. File "
+                f"saved to path: `{data['path']}`.",
                 color=disnake.Color.yellow(),
                 timestamp=datetime.now(),
             )
