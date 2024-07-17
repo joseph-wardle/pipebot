@@ -49,24 +49,27 @@ class Webserver(commands.Cog):
         @routes.post("/model_checker")
         async def model_checker(request: web.Request) -> web.Response:
             raw = await request.read()
-            # hashcheck = (
-            #     "sha1="
-            #     + hmac.new(
-            #         os.getenv("PIPEBOT_SECRET", "").encode(), raw, sha1
-            #     ).hexdigest()
-            # )
-            # if hashcheck != request.headers["x-pipebot-signature"]:
-            #     print("Error: hashes do not match")
-            #     return web.Response(body="", status=401)
+            hashcheck = (
+                "sha1="
+                + hmac.new(
+                    os.getenv("PIPEBOT_SECRET", "").encode(), raw, sha1
+                ).hexdigest()
+            )
+            if hashcheck != request.headers["x-pipebot-signature"]:
+                print("Error: hashes do not match")
+                return web.Response(body="", status=401)
 
             data = await request.json()
             pprint(data)
             embed = disnake.Embed(
                 title="Model Publish Override",
-                description=f"Notice! The model **{data['asset']}** was exported without passing the model checker to path `{data['path']}` by user **{data['user']}**",
+                description=f"Notice! The model **{data['asset']}** was "
+                f"exported without passing the model checker by user "
+                f"**{data['user']}**. File saved to path: `{data['path']}`.",
                 color=disnake.Color.yellow(),
                 timestamp=datetime.now(),
             )
+            embed.set_thumbnail(url="")
             await self.leads_channel.send(embed=embed)
             return web.Response(status=200)
 
