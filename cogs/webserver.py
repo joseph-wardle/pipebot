@@ -70,7 +70,7 @@ class Webserver(commands.Cog):
                 timestamp=datetime.now(),
             )
             embed.set_thumbnail(url="")
-            await self.leads_channel.send(embed=embed)
+            await self.modeling_channel.send(embed=embed)
             return web.Response(status=200)
 
         self.app.add_routes(routes)
@@ -103,6 +103,14 @@ class Webserver(commands.Cog):
             raise TypeError("Leads channel is invaleid")
 
         self.leads_channel = leads_channel
+
+        modeling_channel = await self.bot.fetch_channel(
+            int(os.getenv("MODELING_CHANNEL_ID", ""))
+        )
+        if not isinstance(modeling_channel, disnake.TextChannel):
+            raise TypeError("Modeling channel is invaleid")
+
+        self.modeling_channel = modeling_channel
 
 
 def setup(bot: commands.Bot) -> None:
