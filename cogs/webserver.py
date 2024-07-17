@@ -45,6 +45,24 @@ class Webserver(commands.Cog):
             await self.testing_channel.send("```json\n" + json.dumps(data) + "\n```")
             return web.Response(status=200)
 
+        @routes.post("/model_checker")
+        async def model_checker(request: web.Request) -> web.Response:
+            raw = await request.read()
+            # hashcheck = (
+            #     "sha1="
+            #     + hmac.new(
+            #         os.getenv("PIPEBOT_SECRET", "").encode(), raw, sha1
+            #     ).hexdigest()
+            # )
+            # if hashcheck != request.headers["x-pipebot-signature"]:
+            #     print("Error: hashes do not match")
+            #     return web.Response(body="", status=401)
+
+            data = await request.json()
+            pprint(data)
+            # await self.leads_channel.send("hi")
+            return web.Response(status=200)
+
         self.app.add_routes(routes)
 
     @tasks.loop()
@@ -63,9 +81,17 @@ class Webserver(commands.Cog):
             int(os.getenv("TESTING_CHANNEL_ID", ""))
         )
         if not isinstance(testing_channel, disnake.TextChannel):
-            raise TypeError("Channel is invalid")
+            raise TypeError("Testing channel is invalid")
 
         self.testing_channel = testing_channel
+
+        leads_channel = await self.bot.fetch_channel(
+            int(os.getenv("LEADS_CHANNEL_ID", ""))
+        )
+        if not isinstance(testing_channel, disnake.TextChannel):
+            raise TypeError("Leads channel is invaleid")
+
+        self.leads_channel = leads_channel
 
 
 def setup(bot: commands.Bot) -> None:
