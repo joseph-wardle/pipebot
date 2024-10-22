@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from enum import Enum
 from github import Auth, Github
 from hashlib import sha1
-from textwrap import dedent
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -112,15 +111,13 @@ class BugModal(disnake.ui.Modal):
         title = inter.text_values["title"]
         description = inter.text_values["description"]
 
-        body = dedent(
-            f"""\
-            ***Issue submitted via PipeBot***
-            **Reporting user:** {inter.user.display_name}
-            
-            ---
-            
-            {description}
-            """
+        body = (
+            f"***Issue submitted via [PipeBot](https://github.com/{os.getenv('GITHUB_REPO')})***\n"
+            f"**Reporting user:** {inter.user.display_name}\n"
+            "\n"
+            "---\n"
+            "\n"
+            f"{description}\n"
         )
 
         if image1 := await self.image1Url:
