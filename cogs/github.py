@@ -112,7 +112,7 @@ class BugModal(disnake.ui.Modal):
         description = inter.text_values["description"]
 
         body = (
-            f"***Issue submitted via [PipeBot](https://github.com/{os.getenv('GITHUB_REPO')})***\n"
+            "***Issue submitted via [PipeBot](https://github.com/scottdmilner/pipebot)***\n"
             f"**Reporting user:** {inter.user.display_name}\n"
             "\n"
             "---\n"
