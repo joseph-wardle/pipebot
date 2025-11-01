@@ -4,7 +4,14 @@ import disnake
 import hmac
 import json
 import os
-from aiohttp import web
+from aiohttp.web import (
+    AppRunner,
+    Application,
+    Request,
+    Response,
+    RouteTableDef,
+    TCPSite,
+)
 from datetime import datetime
 from disnake.ext import commands, tasks
 from hashlib import sha1
@@ -19,17 +26,17 @@ class Webserver(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.webserver_port = int(os.getenv("LISTEN_PORT", ""))
-        self.app = web.Application()
-        routes = web.RouteTableDef()
+        self.app = Application()
+        routes = RouteTableDef()
 
         self.web_server.start()
 
         @routes.get("/")
-        async def welcome(request: web.Request) -> web.Response:
-            return web.Response(body="", status=400)
+        async def welcome(request: Request) -> Response:
+            return Response(body="", status=400)
 
         @routes.post("/shotgrid")
-        async def shotgrid(request: web.Request) -> web.Response:
+        async def shotgrid(request: Request) -> Response:
             raw = await request.read()
             hashcheck = (
                 "sha1="
@@ -39,15 +46,15 @@ class Webserver(commands.Cog):
             )
             if hashcheck != request.headers["x-sg-signature"]:
                 print("Error: hashes do not match")
-                return web.Response(body="", status=401)
+                return Response(body="", status=401)
 
             data = await request.json()
             pprint(data)
             await self.testing_channel.send("```json\n" + json.dumps(data) + "\n```")
-            return web.Response(status=200)
+            return Response(status=200)
 
         @routes.post("/model_checker")
-        async def model_checker(request: web.Request) -> web.Response:
+        async def model_checker(request: Request) -> Response:
             raw = await request.read()
             hashcheck = (
                 "sha1="
@@ -57,7 +64,7 @@ class Webserver(commands.Cog):
             )
             if hashcheck != request.headers["x-pipebot-signature"]:
                 print("Error: hashes do not match")
-                return web.Response(body="", status=401)
+                return Response(body="", status=401)
 
             data = await request.json()
             pprint(data)
@@ -71,15 +78,15 @@ class Webserver(commands.Cog):
             )
             embed.set_thumbnail(url="")
             await self.modeling_channel.send(embed=embed)
-            return web.Response(status=200)
+            return Response(status=200)
 
         self.app.add_routes(routes)
 
     @tasks.loop()
     async def web_server(self) -> None:
-        runner = web.AppRunner(self.app)
+        runner = AppRunner(self.app)
         await runner.setup()
-        site = web.TCPSite(runner, host="0.0.0.0", port=self.webserver_port)
+        site = TCPSite(runner, host="0.0.0.0", port=self.webserver_port)
         await site.start()
         print(f"Webserver running on port {self.webserver_port}")
 
