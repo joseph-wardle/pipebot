@@ -1,6 +1,4 @@
 __pycache__
-.env
-poetry.lock
-profile_pics/*.png
-profile_pics/*.jpg
-testdata.json
+.venv
+profile_pics
+profile_pics
