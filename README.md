@@ -10,5 +10,5 @@ A Discord bot for supporting CGI film pipeline workflows.
 
 ## Development
 
-- Run type checks with `uv run mypy`.
-- Lint and format with `uv run ruff check .` and `uv run ty check`.
+- Format with `uv run ruff format`.
+- Enforce type safety and styling with `uv run ty check .`.
