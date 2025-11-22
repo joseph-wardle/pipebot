@@ -20,7 +20,7 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -f pipebot/Containerfile -t ghcr.io/${{ github.repository_owner }}/pipebot:latest .
+          docker build -f Containerfile -t ghcr.io/${{ github.repository_owner }}/pipebot:latest .
 
       - name: Show image digest
         run: |
