@@ -2,7 +2,7 @@ name: Build and Push Pipebot Image
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read
@@ -22,14 +22,14 @@ jobs:
         run: |
           docker build -f Containerfile -t ghcr.io/${{ github.repository_owner }}/pipebot:latest .
 
+      - name: Push latest
+        run: docker push ghcr.io/${{ github.repository_owner }}/pipebot:latest
+
       - name: Show image digest
         run: |
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/${{ github.repository_owner }}/pipebot:latest)
           echo "Digest=${DIGEST}"
           echo "IMAGE_DIGEST=${DIGEST}" >> $GITHUB_ENV
-
-      - name: Push latest
-        run: docker push ghcr.io/${{ github.repository_owner }}/pipebot:latest
 
       - name: (Optional) Push immutable digest tag
         run: |
